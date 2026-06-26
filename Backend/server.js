@@ -15,9 +15,19 @@ const adminRoutes = require('./routes/adminRoutes');
 connectDB();
 
 const app = express();
-
+// node server.js
 // ─── Middleware ───────────────────────────────────────────────
-app.use(cors({ origin: ['http://localhost:3000','http://localhost:3001','http://localhost:3002','http://localhost:3003'], credentials: true }));
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'https://nexmart-website.netlify.app'
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -48,8 +58,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`NexMart server running on port ${PORT}`);
 });
-
-
-
-// Enable CORS for all origins
-app.use(cors()); 
