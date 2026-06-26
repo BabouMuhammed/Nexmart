@@ -31,7 +31,6 @@ export default function Dashboard() {
     name: 'Muhammed Babou',
     email: 'muhammed.babou@example.com',
     memberSince: 'January 2025',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
   };
 
   return (
@@ -60,15 +59,6 @@ export default function Dashboard() {
           >
             <GlassCard>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                <div className="relative">
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-20 h-20 rounded-full"
-                  />
-                  <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-green-500 border-2 border-[#050B2D]" />
-                </div>
-
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-white mb-1">
                     {user.name}
@@ -109,21 +99,18 @@ export default function Dashboard() {
             <DashboardCard
               title="Total Orders"
               value={orders.length}
-              change={12.5}
               icon={ShoppingBag}
               accent="cyan"
             />
             <DashboardCard
               title="Wishlist Items"
               value={wishlistItems.length}
-              change={8.2}
               icon={Heart}
               accent="purple"
             />
             <DashboardCard
               title="Reviews Left"
-              value="12"
-              change={-2.1}
+              value={0}
               icon={MessageSquare}
               accent="cyan"
             />

@@ -164,20 +164,13 @@ export default function AdminUsers() {
                         className="border-b border-[rgba(0,229,212,0.1)] transition-colors"
                       >
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={user.avatar}
-                              alt={user.name}
-                              className="w-10 h-10 rounded-full"
-                            />
-                            <div>
-                              <p className="font-semibold text-white text-sm flex items-center gap-2">
-                                {user.name}
-                                {user.role === 'admin' && (
-                                  <Crown className="w-4 h-4 text-[#FFD93D]" />
-                                )}
-                              </p>
-                            </div>
+                          <div>
+                            <p className="font-semibold text-white text-sm flex items-center gap-2">
+                              {user.name}
+                              {user.role === 'admin' && (
+                                <Crown className="w-4 h-4 text-[#FFD93D]" />
+                              )}
+                            </p>
                           </div>
                         </td>
                         <td className="py-3 px-4">

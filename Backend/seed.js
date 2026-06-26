@@ -41,7 +41,7 @@ const sampleProducts = (sellerId) => [
   },
   {
     name: 'Ultra-Performance Running Shoes',
-    description: 'Designed for athletes. Lightweight, breathable mesh upper with responsive cushioning for maximum energy return.',
+    description: 'Lightweight, breathable mesh upper with responsive cushioning for maximum energy return.',
     price: 85.00,
     discountPrice: 70.00,
     category: 'Clothing',
@@ -83,58 +83,67 @@ const seedData = async () => {
   await connectDB();
 
   try {
-    // 1. Seed/Reset Admin User
+    // 1. Admin User
     let admin = await User.findOne({ email: 'admin@nexmart.com' });
     if (!admin) {
       admin = await User.create({
-        name: 'NexMart Admin',
+        name: 'Mamadou Babou',
         email: 'admin@nexmart.com',
         password: 'admin123',
         role: 'admin',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'
+        avatar: '',
       });
       console.log('Admin user created:', admin.email);
     } else {
+      admin.name = 'Mamadou Babou';
       admin.password = 'admin123';
-      admin.role = 'admin'; // Ensure the role is reset to admin
+      admin.role = 'admin';
+      admin.avatar = '';
       await admin.save();
       console.log('Admin user reset (password: admin123, role: admin)');
     }
 
-    // 2. Seed/Reset Seller User
+    // 2. Seller User
     let seller = await User.findOne({ email: 'seller@nexmart.com' });
     if (!seller) {
       seller = await User.create({
-        name: 'NexMart Seller',
+        name: 'Fatou Fofana',
         email: 'seller@nexmart.com',
         password: 'seller123',
         role: 'seller',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop'
+        avatar: '',
       });
       console.log('Seller user created:', seller.email);
     } else {
+      seller.name = 'Fatou Fofana';
       seller.password = 'seller123';
-      seller.role = 'seller'; // Ensure the role is reset to seller
+      seller.role = 'seller';
+      seller.avatar = '';
       await seller.save();
       console.log('Seller user reset (password: seller123, role: seller)');
     }
 
-    // 3. Seed/Reset Customer User
-    let customer = await User.findOne({ email: 'customer@nexmart.com' });
-    if (!customer) {
-      customer = await User.create({
-        name: 'John Doe',
-        email: 'customer@nexmart.com',
-        password: 'customer123',
-        role: 'customer',
-        avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop'
-      });
-      console.log('Customer user created:', customer.email);
-    } else {
-      customer.password = 'customer123';
-      customer.role = 'customer'; // Ensure the role is reset to customer
-      await customer.save();
-      console.log('Customer user reset (password: customer123, role: customer)');
+    // 3. Customer Users with Gambian names
+    const customers = [
+      { name: 'Madi Bah', email: 'madi.bah@nexmart.com', password: 'customer123' },
+      { name: 'Awa Kah', email: 'awa.kah@nexmart.com', password: 'customer123' },
+      { name: 'Binta Babou', email: 'binta.babou@nexmart.com', password: 'customer123' },
+      { name: 'Mamadou Fofana', email: 'mamadou.fofana@nexmart.com', password: 'customer123' },
+      { name: 'Fatou Jallow', email: 'fatou.jallow@nexmart.com', password: 'customer123' },
+    ];
+
+    for (const c of customers) {
+      let user = await User.findOne({ email: c.email });
+      if (!user) {
+        await User.create({ ...c, role: 'customer', avatar: '' });
+        console.log('Customer created:', c.email);
+      } else {
+        user.name = c.name;
+        user.password = c.password;
+        user.avatar = '';
+        await user.save();
+        console.log('Customer reset:', c.email);
+      }
     }
 
     // 4. Seed Products
@@ -144,10 +153,10 @@ const seedData = async () => {
       await Product.insertMany(products);
       console.log('Sample products seeded successfully!');
     } else {
-      console.log('Products already exist in database. Skipping product seeding.');
+      console.log('Products already exist. Skipping product seeding.');
     }
 
-    console.log('Seeding process complete.');
+    console.log('Seeding complete.');
     process.exit(0);
   } catch (error) {
     console.error('Error seeding database:', error.message);

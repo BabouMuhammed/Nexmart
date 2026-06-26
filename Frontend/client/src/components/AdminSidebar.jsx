@@ -4,8 +4,6 @@ import {
   Package,
   ShoppingCart,
   Users,
-  BarChart3,
-  Settings,
   LogOut,
   Zap,
 } from 'lucide-react';
@@ -19,8 +17,6 @@ export function AdminSidebar() {
     { icon: Package, label: 'Products', href: '/admin/products' },
     { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
     { icon: Users, label: 'Users', href: '/admin/users' },
-    { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
-    { icon: Settings, label: 'Settings', href: '/admin/settings' },
   ];
 
   const isActive = (href) => location === href;
