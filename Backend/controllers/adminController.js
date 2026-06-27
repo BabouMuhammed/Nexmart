@@ -21,7 +21,7 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 
     // Total revenue from paid orders
     Order.aggregate([
-      { $match: { isPaid: true } },
+      { $match: {} },
       { $group: { _id: null, total: { $sum: '$totalPrice' } } },
     ]),
 
@@ -42,7 +42,7 @@ const getDashboardStats = asyncHandler(async (req, res) => {
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
   const monthlyRevenue = await Order.aggregate([
-    { $match: { isPaid: true, createdAt: { $gte: sixMonthsAgo } } },
+    { $match: { createdAt: { $gte: sixMonthsAgo } } },
     {
       $group: {
         _id: { month: { $month: '$createdAt' }, year: { $year: '$createdAt' } },
