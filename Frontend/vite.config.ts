@@ -17,6 +17,17 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
   },
+  build: {
+  rollupOptions: {
+    output: {
+      manualChunks: {
+        vendor: ['react', 'react-dom'],
+        charts: ['recharts'],
+        motion: ['framer-motion'],
+      }
+    }
+  }
+},
   server: {
     port: 3000,
     strictPort: false,
@@ -28,3 +39,4 @@ export default defineConfig({
     },
   },
 });
+
