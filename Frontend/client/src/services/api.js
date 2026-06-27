@@ -255,7 +255,13 @@ export async function removeFromCart(itemId) {
   return data;
 }
 
+
+
 export async function createOrder(orderData) {
   const { data } = await api.post('/api/orders', orderData);
+  return data;
+}
+export async function getMe() {
+  const { data } = await api.get('/api/auth/me');
   return data;
 }
