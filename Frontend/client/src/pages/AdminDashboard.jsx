@@ -46,25 +46,47 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const loadData = async () => {
-      const s = await getAdminStats();
-      const rd = await getRevenueData();
-      const osd = await getOrderStatusData();
-      const mod = await getMonthlyOrdersData();
-      const o = await getAdminOrders();
-
+  const loadData = async () => {
+    try {
+      const [s, rd, osd, mod, o] = await Promise.all([
+        getAdminStats(),
+        getRevenueData(),
+        getOrderStatusData(),
+        getMonthlyOrdersData(),
+        getAdminOrders(),
+      ]);
       setStats(s);
       setRevenueData(rd);
       setOrderStatusData(osd);
       setMonthlyOrdersData(mod);
       setOrders(o.slice(0, 5));
-    };
-    loadData();
-  }, []);
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+      setStats({
+        totalRevenue: 0,
+        totalOrders: 0,
+        totalProducts: 0,
+        totalCustomers: 0,
+        revenueGrowth: 0,
+        ordersGrowth: 0,
+        productsGrowth: 0,
+        customersGrowth: 0,
+      });
+    }
+  };
+  loadData();
+}, []);
 
   if (!stats) {
-    return <div className="text-white">Loading...</div>;
-  }
+  return (
+    <div className="min-h-screen bg-[#050B2D] flex">
+      <AdminSidebar />
+      <div className="flex-1 ml-64 p-8">
+        <div className="text-white text-xl">Loading dashboard...</div>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-[#050B2D] flex">

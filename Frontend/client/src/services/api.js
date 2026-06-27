@@ -149,7 +149,9 @@ export async function getAdminProducts() {
 
 export async function getAdminStats() {
   try {
+    console.log('Fetching admin stats, token:', localStorage.getItem('token'));
     const { data } = await api.get('/api/admin/stats');
+    console.log('Admin stats response:', data);
     return {
       totalRevenue: data.totalRevenue || 0,
       revenueGrowth: 0,
@@ -161,7 +163,7 @@ export async function getAdminStats() {
       customersGrowth: 0,
     };
   } catch (error) {
-    console.error('getAdminStats failed:', getErrorMessage(error));
+    console.error('getAdminStats failed:', error.response?.status, error.response?.data);
     return {
       totalRevenue: 0,
       revenueGrowth: 0,
@@ -174,7 +176,6 @@ export async function getAdminStats() {
     };
   }
 }
-
 export async function getRevenueData() {
   try {
     const { data } = await api.get('/api/admin/stats');
