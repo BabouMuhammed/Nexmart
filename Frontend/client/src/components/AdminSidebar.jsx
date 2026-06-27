@@ -65,20 +65,30 @@ export function AdminSidebar() {
       </nav>
 
       {/* Bottom Section */}
-      <div className="p-4 border-t border-[rgba(0,229,212,0.1)]">
-        <div className="glass rounded-lg p-4 mb-4">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00E5D4] to-[#8B5CF6] mb-3" />
-          <p className="text-sm font-semibold text-white">Babou Admin</p>
-          <p className="text-xs text-[#A0AEC0]">admin@nexmart.com</p>
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-[#A0AEC0] hover:bg-red-500/10 hover:text-red-400 transition-all"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="text-sm font-medium">Logout</span>
-        </motion.button>
+      <div className="glass rounded-lg p-4 mb-4">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00E5D4] to-[#8B5CF6] mb-3" />
+         <p className="text-sm font-semibold text-white">
+          {JSON.parse(localStorage.getItem('user') || '{}').name || 'Admin'}
+         </p>
+          <p className="text-xs text-[#A0AEC0]">
+           {JSON.parse(localStorage.getItem('user') || '{}').email || ''}
+        </p>
       </div>
-    </motion.aside>
+      <div>
+        <motion.button
+  whileHover={{ scale: 1.02 }}
+  onClick={() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  }}
+  className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-[#A0AEC0] hover:bg-red-500/10 hover:text-red-400 transition-all"
+>
+  <LogOut className="w-4 h-4" />
+  <span className="text-sm font-medium">Logout</span>
+</motion.button>
+       
+      </div>
+         </motion.aside>
   );
 }

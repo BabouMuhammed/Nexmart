@@ -124,15 +124,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Forgot Password */}
-            <div className="text-right">
-              <a
-                href="#"
-                className="text-sm text-[#00E5D4] hover:text-[#06B6D4] transition-colors"
-              >
-                Forgot password?
-              </a>
-            </div>
+          
 
             {/* Sign In Button */}
             <NeonButton
@@ -148,31 +140,6 @@ export default function Login() {
             </NeonButton>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-px bg-[rgba(0,229,212,0.1)]" />
-            <span className="text-xs text-[#A0AEC0]">or continue with</span>
-            <div className="flex-1 h-px bg-[rgba(0,229,212,0.1)]" />
-          </div>
-
-          {/* Social Buttons */}
-          <div className="grid grid-cols-2 gap-3 mb-8">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="bg-[#0B143D] border border-[rgba(0,229,212,0.1)] rounded-lg py-2 text-white hover:bg-[#111A4A] transition-colors"
-            >
-              Google
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="bg-[#0B143D] border border-[rgba(0,229,212,0.1)] rounded-lg py-2 text-white hover:bg-[#111A4A] transition-colors"
-            >
-              GitHub
-            </motion.button>
-          </div>
-
           {/* Sign Up Link */}
           <p className="text-center text-[#A0AEC0]">
             Don't have an account?{' '}
@@ -185,15 +152,6 @@ export default function Login() {
           </p>
         </GlassCard>
 
-        {/* Demo Credentials Hint */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center text-xs text-[#64748B] mt-6"
-        >
-          Demo: admin@nexmart.com / admin123
-        </motion.p>
       </motion.div>
     </div>
   );
