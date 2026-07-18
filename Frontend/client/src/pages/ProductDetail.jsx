@@ -25,7 +25,7 @@ import {
 } from '../services/api';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
-import { useAuth } from '../contexts/authContext.tsx';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProductDetail() {
   const [product, setProduct] = useState(null);

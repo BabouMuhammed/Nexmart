@@ -5,8 +5,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
-import { AuthProvider } from "./contexts/authContext.tsx";
-import { WishlistProvider } from "./contexts/WishListContext.tsx";
+import { AuthProvider } from "./contexts/AuthContext";
+import { WishlistProvider } from "./contexts/WishListContext";
 
 // Public Pages
 import Home from "./pages/Home.jsx";

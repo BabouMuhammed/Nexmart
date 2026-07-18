@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { useAuth } from './authContext.tsx';
+import { useAuth } from './AuthContext';
 import { getWishlist, addToWishlist, removeFromWishlist } from '../services/api';
 
 export interface WishlistProduct {
