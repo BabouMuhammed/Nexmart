@@ -8,6 +8,7 @@ import { useCart } from '../contexts/CartContext';
 export function Navbar({ cartCount: propCartCount = 0 }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const { cartCount } = useCart();
   const [, navigate] = useLocation();
   const effectiveCartCount = cartCount ?? propCartCount;
@@ -19,6 +20,20 @@ export function Navbar({ cartCount: propCartCount = 0 }) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/login');
+  };
 
   const navLinks = [
     { label: 'Home', href: '/', icon: Home },
@@ -122,16 +137,28 @@ export function Navbar({ cartCount: propCartCount = 0 }) {
               )}
             </motion.button>
 
-            {/* Login Button */}
-            <NeonButton
-              variant={isScrolled ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => navigate('/login')}
-              className="gap-2"
-            >
-              <LogIn className="w-4 h-4" />
-              <span className="hidden sm:inline">Sign In</span>
-            </NeonButton>
+            {/* Login Button or User Menu */}
+            {user ? (
+              <NeonButton
+                variant={isScrolled ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={handleLogout}
+                className="gap-2"
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline">{user.name}</span>
+              </NeonButton>
+            ) : (
+              <NeonButton
+                variant={isScrolled ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => navigate('/login')}
+                className="gap-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign In</span>
+              </NeonButton>
+            )}
 
             {/* Mobile Menu Button */}
             <motion.button
@@ -169,17 +196,4 @@ export function Navbar({ cartCount: propCartCount = 0 }) {
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-white/70 hover:text-[#00E5D4] hover:bg-[#0B143D] transition-all"
                       whileHover={{ x: 4 }}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {link.label}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.nav>
-  );
-}
+                    ></motion.button>
