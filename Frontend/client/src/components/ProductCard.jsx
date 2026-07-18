@@ -3,7 +3,7 @@ import { Heart, ShoppingCart, Star, Sparkles } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { NeonButton } from './NeonButton';
 import { GlassCard } from './GlassCard';
-import { useWishlist } from '../contexts/WishlistContext';
+import { useWishlist } from '../contexts/WishListContext';
 
 export function ProductCard({ product, onAddToCart }) {
   const [, navigate] = useLocation();

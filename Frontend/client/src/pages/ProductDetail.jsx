@@ -24,7 +24,7 @@ import {
   createReview,
 } from '../services/api';
 import { useCart } from '../contexts/CartContext';
-import { useWishlist } from '../contexts/WishlistContext';
+import { useWishlist } from '../contexts/WishListContext';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ProductDetail() {
