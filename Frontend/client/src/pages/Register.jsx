@@ -39,40 +39,44 @@ export default function Register() {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError('');
   };
+const handleRegister = async (e) => {
+  e.preventDefault();
+  console.log('STEP 1: form submitted');
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  if (isSubmitting.current) return;
 
-    if (!isPasswordValid) {
-      setError('Password does not meet requirements');
-      return;
+  if (!isPasswordValid) {
+    setError('Password does not meet requirements');
+    return;
+  }
+  if (!passwordsMatch) {
+    setError('Passwords do not match');
+    return;
+  }
+
+  isSubmitting.current = true;
+  setLoading(true);
+  console.log('STEP 2: about to call register()');
+
+  try {
+    const result = await register(formData.fullName, formData.email, formData.password, formData.role);
+    console.log('STEP 3: register() returned', result);
+    if (result.token) {
+      console.log('STEP 4: token found, calling setStep(2)');
+      setStep(2);
+    } else {
+      console.log('STEP 4-ALT: no token, showing error');
+      setError('Registration failed. Please try again.');
     }
-
-    if (!passwordsMatch) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const result = await register(
-        formData.fullName,
-        formData.email,
-        formData.password,
-        formData.role
-      );
-      if (result.token) {
-        setStep(2);
-      } else {
-        setError('Registration failed. Please try again.');
-      }
-    } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    console.log('STEP 3-ERROR: threw', err);
+    setError(err.message || 'Registration failed. Please try again.');
+  } finally {
+    console.log('STEP 5: finally block, loading off');
+    setLoading(false);
+    isSubmitting.current = false;
+  }
+};    
 
   return (
     <div className="min-h-screen bg-[#050B2D] flex items-center justify-center relative overflow-hidden">
