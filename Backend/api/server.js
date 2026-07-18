@@ -56,6 +56,20 @@ app.get('/', (req, res) => {
 // ─── Global Error Handler ────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error('ERROR HANDLER CAUGHT:', err); // always logs full error + stack server-side
+
+  // Mongoose validation errors (bad enum, missing required field, etc.)
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      message: 'Validation failed',
+      errors: Object.values(err.errors).map((e) => e.message),
+    });
+  }
+
+  // Invalid ObjectId in a route param like /api/products/:id
+  if (err.name === 'CastError') {
+    return res.status(400).json({ message: `Invalid ${err.path}: ${err.value}` });
+  }
+
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode).json({
     message: err.message,

@@ -62,9 +62,6 @@ export default function Dashboard() {
                   <p className="text-[#A0AEC0] mb-2">{user.email}</p>
                   <p className="text-sm text-[#64748B]">Member since {user.memberSince}</p>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-1 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#00E5D4]">
-                  <span className="text-xs font-bold text-white">Premium</span>
-                </div>
               </div>
             </GlassCard>
           </motion.div>

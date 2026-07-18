@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Search, ShoppingCart, Menu, X, LogIn, LogOut, Home, Store, User, ChevronDown } from 'lucide-react';
+import { Zap, ShoppingCart, Menu, X, LogIn, LogOut, Home, Store, User, ChevronDown } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { NeonButton } from './NeonButton';
 import { useCart } from '../contexts/CartContext';
@@ -109,18 +109,6 @@ export function Navbar({ cartCount: propCartCount = 0 }) {
 
           {/* Right Section */}
           <div className="flex items-center gap-4">
-            {/* Search Icon */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              className={`p-2 rounded-lg transition-all ${
-                isScrolled
-                  ? 'hover:bg-[#00E5D4]/20 text-white'
-                  : 'hover:bg-white/20 text-white'
-              }`}
-            >
-              <Search className="w-5 h-5" />
-            </motion.button>
-
             {/* Cart Icon */}
             <motion.button
               whileHover={{ scale: 1.1 }}

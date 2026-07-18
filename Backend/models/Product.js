@@ -31,7 +31,7 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Category is required'],
       enum: [
         'Electronics',
-        'Clothing',
+        'Fashion',
         'Books',
         'Home & Garden',
         'Sports',
