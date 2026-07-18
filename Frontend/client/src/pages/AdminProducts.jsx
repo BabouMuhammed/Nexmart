@@ -9,6 +9,7 @@ import {
   Package,
   AlertCircle,
   X,
+  Upload,
 } from 'lucide-react';
 import { AdminSidebar } from '../components/AdminSidebar';
 import { GlassCard } from '../components/GlassCard';
@@ -35,6 +36,9 @@ export default function AdminProducts() {
     badge: 'None',
     description: '',
   });
+  const [imageFiles, setImageFiles] = useState([]); // File objects to upload
+  const [imagePreviews, setImagePreviews] = useState([]); // object URLs for preview
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -44,6 +48,13 @@ export default function AdminProducts() {
     loadProducts();
   }, []);
 
+  // Clean up preview object URLs when they change or the component unmounts
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imagePreviews]);
+
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -52,6 +63,12 @@ export default function AdminProducts() {
     total: products.length,
     inStock: products.filter((p) => p.stock > 0).length,
     lowStock: products.filter((p) => p.stock > 0 && p.stock <= 20).length,
+  };
+
+  const resetImageState = () => {
+    imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    setImageFiles([]);
+    setImagePreviews([]);
   };
 
   const handleAddProduct = () => {
@@ -64,6 +81,7 @@ export default function AdminProducts() {
       badge: 'None',
       description: '',
     });
+    resetImageState();
     setShowModal(true);
   };
 
@@ -77,13 +95,37 @@ export default function AdminProducts() {
       badge: product.badge || 'None',
       description: product.description,
     });
+    resetImageState();
     setShowModal(true);
   };
 
-  const [error, setError] = useState('');
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setImageFiles(files);
+    setImagePreviews((prev) => {
+      prev.forEach((url) => URL.revokeObjectURL(url));
+      return files.map((file) => URL.createObjectURL(file));
+    });
+  };
+
+  const handleRemoveImage = (index) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
 
   const handleSaveProduct = async () => {
     setError('');
+
+    if (!selectedProduct && imageFiles.length === 0) {
+      setError('Please upload at least one product image.');
+      return;
+    }
+
     const productPayload = {
       name: formData.name,
       description: formData.description,
@@ -92,6 +134,10 @@ export default function AdminProducts() {
       category: formData.category,
       badge: formData.badge === 'None' ? '' : formData.badge,
     };
+
+    if (imageFiles.length > 0) {
+      productPayload.images = imageFiles;
+    }
 
     try {
       if (selectedProduct) {
@@ -106,6 +152,7 @@ export default function AdminProducts() {
         setProducts((prev) => [created, ...prev]);
       }
       setShowModal(false);
+      resetImageState();
     } catch (err) {
       console.error('Failed to save product:', err);
       setError('Unable to save product. Please try again.');
@@ -327,7 +374,7 @@ export default function AdminProducts() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-[#0B143D] rounded-2xl p-8 max-w-md w-full border border-[rgba(0,229,212,0.2)]"
+              className="bg-[#0B143D] rounded-2xl p-8 max-w-md w-full border border-[rgba(0,229,212,0.2)] max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">
@@ -342,6 +389,48 @@ export default function AdminProducts() {
               </div>
 
               <form className="space-y-4">
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Product Image{selectedProduct ? ' (unchanged unless replaced)' : ''}
+                  </label>
+
+                  {imagePreviews.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-2 mb-2">
+                      {imagePreviews.map((src, index) => (
+                        <div key={src} className="relative group">
+                          <img
+                            src={src}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-20 object-cover rounded-lg border border-[rgba(0,229,212,0.2)]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-3 h-3 text-white" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center gap-2 w-full h-24 border-2 border-dashed border-[rgba(0,229,212,0.3)] rounded-lg cursor-pointer hover:border-[#00E5D4] transition-colors">
+                      <Upload className="w-5 h-5 text-[#A0AEC0]" />
+                      <span className="text-xs text-[#A0AEC0]">
+                        Click to upload image(s)
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        multiple
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+
                 <input
                   type="text"
                   placeholder="Product Name"

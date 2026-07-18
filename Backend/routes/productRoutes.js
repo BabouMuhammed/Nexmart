@@ -16,7 +16,13 @@ router.get('/', getProducts);
 router.get('/featured', getFeaturedProducts);
 router.get('/:id', getProductById);
 
-router.post('/', protect, roleGuard('seller', 'admin'), createProduct);
+router.post(
+  '/',
+  protect,
+  roleGuard('seller', 'admin'),
+  upload.array('images', 5), // accepts up to 5 files under the "images" field
+  createProduct
+);
 
 router.put('/:id', protect, roleGuard('seller', 'admin'), updateProduct);
 router.delete('/:id', protect, roleGuard('seller', 'admin'), deleteProduct);

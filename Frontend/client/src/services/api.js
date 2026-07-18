@@ -161,9 +161,26 @@ export async function getAdminProducts() {
   return getProducts();
 }
 
+// Replace the existing createProduct function in services/api.js with this:
+
 export async function createProduct(productData) {
   try {
-    const { data } = await api.post('/api/products', productData);
+    let payload = productData;
+
+    // If images were attached, build multipart FormData instead of plain JSON
+    if (productData.images && productData.images.length > 0) {
+      const form = new FormData();
+      Object.entries(productData).forEach(([key, value]) => {
+        if (key === 'images') {
+          value.forEach((file) => form.append('images', file));
+        } else {
+          form.append(key, value);
+        }
+      });
+      payload = form;
+    }
+
+    const { data } = await api.post('/api/products', payload);
     return normalizeProduct(data);
   } catch (error) {
     console.error('createProduct failed:', getErrorMessage(error));
