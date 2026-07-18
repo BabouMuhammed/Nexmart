@@ -8,6 +8,7 @@ import { FilterPanel } from '../components/FilterPanel';
 import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
 import { NeonButton } from '../components/NeonButton';
+import { useCart } from '../contexts/CartContext';
 import { getProducts, getCategories } from '../services/api';
 
 export default function Shop() {
@@ -17,6 +18,7 @@ export default function Shop() {
   const [viewMode, setViewMode] = useState('grid');
   const [filters, setFilters] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const { addItemToCart } = useCart();
   const [, navigate] = useLocation();
 
   useEffect(() => {
@@ -174,7 +176,10 @@ export default function Shop() {
                       whileHover={{ y: -4 }}
                       onClick={() => navigate(`/product/${product._id}`)}
                     >
-                      <ProductCard product={product} />
+                      <ProductCard
+                        product={product}
+                        onAddToCart={() => addItemToCart(product._id)}
+                      />
                     </motion.div>
                   ))}
                 </motion.div>

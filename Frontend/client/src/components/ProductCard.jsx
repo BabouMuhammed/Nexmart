@@ -130,7 +130,10 @@ export function ProductCard({ product, onAddToCart }) {
               variant="primary"
               size="sm"
               fullWidth
-              onClick={() => onAddToCart && onAddToCart(product)}
+              onClick={(event) => {
+                event.stopPropagation();
+                onAddToCart && onAddToCart(product);
+              }}
               className="gap-2"
             >
               <ShoppingCart className="w-4 h-4" />

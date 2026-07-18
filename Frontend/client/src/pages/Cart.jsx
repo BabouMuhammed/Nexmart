@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useLocation } from 'wouter';
@@ -6,39 +6,50 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { GlassCard } from '../components/GlassCard';
 import { NeonButton } from '../components/NeonButton';
+import { getCart, updateCartItem, removeFromCart } from '../services/api';
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([
-    {
-      _id: '1',
-      name: 'Quantum Headphones Pro',
-      category: 'Electronics',
-      price: 299.99,
-      qty: 1,
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=500&fit=crop',
-    },
-    {
-      _id: '2',
-      name: 'Premium Sneakers X1',
-      category: 'Fashion',
-      price: 159.99,
-      qty: 2,
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop',
-    },
-  ]);
+  const [cartItems, setCartItems] = useState([]);
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [, navigate] = useLocation();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const removeItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item._id !== id));
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        setLoading(true);
+        const cart = await getCart();
+        setCartItems(cart.items || []);
+      } catch (err) {
+        console.error('Failed to load cart', err);
+        setError('Could not load cart. Please sign in and try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCart();
+  }, []);
+
+  const removeItem = async (id) => {
+    try {
+      const data = await removeFromCart(id);
+      setCartItems(data.cart?.items || []);
+    } catch (err) {
+      console.error('Failed to remove item', err);
+      setError('Unable to remove item from cart.');
+    }
   };
 
-  const updateQuantity = (id, qty) => {
-    if (qty > 0) {
-      setCartItems((prev) =>
-        prev.map((item) => (item._id === id ? { ...item, qty } : item))
-      );
+  const updateQuantity = async (id, qty) => {
+    if (qty <= 0) return;
+    try {
+      const data = await updateCartItem(id, qty);
+      setCartItems(data.items || []);
+    } catch (err) {
+      console.error('Failed to update quantity', err);
+      setError('Unable to update cart quantity.');
     }
   };
 
@@ -48,10 +59,22 @@ export default function Cart() {
     }
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
   const discount = promoApplied ? subtotal * 0.1 : 0;
   const shipping = subtotal > 99 ? 0 : 9.99;
   const total = subtotal - discount + shipping;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050B2D] flex items-center justify-center">
+        <Navbar cartCount={cartItems.length} />
+        <div className="text-white text-xl">Loading cart...</div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -112,8 +135,8 @@ export default function Cart() {
                     {/* Image */}
                     <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item.image || item.product?.images?.[0]?.url}
+                        alt={item.name || item.product?.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -131,16 +154,16 @@ export default function Cart() {
                     <div className="flex flex-col items-end gap-2">
                       <div className="flex items-center gap-2 bg-[#0B143D] rounded-lg p-1">
                         <button
-                          onClick={() => updateQuantity(item._id, item.qty - 1)}
+                          onClick={() => updateQuantity(item._id, item.quantity - 1)}
                           className="w-6 h-6 flex items-center justify-center hover:bg-[#00E5D4]/20 rounded transition-colors"
                         >
                           −
                         </button>
                         <span className="w-6 text-center text-white text-sm font-semibold">
-                          {item.qty}
+                          {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item._id, item.qty + 1)}
+                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
                           className="w-6 h-6 flex items-center justify-center hover:bg-[#00E5D4]/20 rounded transition-colors"
                         >
                           +
@@ -160,7 +183,7 @@ export default function Cart() {
                     <div className="text-right">
                       <p className="text-sm text-[#A0AEC0] mb-1">Subtotal</p>
                       <p className="font-bold text-white">
-                        ${(item.price * item.qty).toFixed(2)}
+                        ${(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
                   </motion.div>

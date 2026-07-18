@@ -45,6 +45,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    badge: {
+      type: String,
+      default: '',
+    },
     stock: {
       type: Number,
       required: [true, 'Stock quantity is required'],

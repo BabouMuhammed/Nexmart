@@ -55,6 +55,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
   const order = await Order.create({
     user: req.user._id,
+    customerName: req.user.name,
     items: orderItems,
     shippingAddress,
     paymentMethod,
@@ -63,7 +64,7 @@ const createOrder = asyncHandler(async (req, res) => {
     shippingPrice,
     taxPrice,
     totalPrice,
-    isPaid: paymentMethod === 'cash_on_delivery' ? false : false,
+    isPaid: false,
   });
 
   // Deduct stock
@@ -107,7 +108,9 @@ const markOrderAsPaid = asyncHandler(async (req, res) => {
 // ── @route   GET /api/orders/my
 // ── @access  Private
 const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+  const orders = await Order.find({ user: req.user._id })
+    .populate('user', 'name')
+    .sort({ createdAt: -1 });
   res.json(orders);
 });
 

@@ -14,7 +14,12 @@ import { AdminSidebar } from '../components/AdminSidebar';
 import { GlassCard } from '../components/GlassCard';
 import { NeonButton } from '../components/NeonButton';
 import { DashboardCard } from '../components/DashboardCard';
-import { getAdminProducts } from '../services/api';
+import {
+  getAdminProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} from '../services/api';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -75,8 +80,36 @@ export default function AdminProducts() {
     setShowModal(true);
   };
 
-  const handleSaveProduct = () => {
-    setShowModal(false);
+  const [error, setError] = useState('');
+
+  const handleSaveProduct = async () => {
+    setError('');
+    const productPayload = {
+      name: formData.name,
+      description: formData.description,
+      price: Number(formData.price),
+      stock: Number(formData.stock),
+      category: formData.category,
+      badge: formData.badge === 'None' ? '' : formData.badge,
+    };
+
+    try {
+      if (selectedProduct) {
+        const updated = await updateProduct(selectedProduct._id, productPayload);
+        setProducts((prev) =>
+          prev.map((product) =>
+            product._id === updated._id ? updated : product
+          )
+        );
+      } else {
+        const created = await createProduct(productPayload);
+        setProducts((prev) => [created, ...prev]);
+      }
+      setShowModal(false);
+    } catch (err) {
+      console.error('Failed to save product:', err);
+      setError('Unable to save product. Please try again.');
+    }
   };
 
   const handleDeleteProduct = (product) => {
@@ -84,9 +117,16 @@ export default function AdminProducts() {
     setShowDeleteModal(true);
   };
 
-  const handleConfirmDelete = () => {
-    setProducts((prev) => prev.filter((p) => p._id !== selectedProduct._id));
-    setShowDeleteModal(false);
+  const handleConfirmDelete = async () => {
+    setError('');
+    try {
+      await deleteProduct(selectedProduct._id);
+      setProducts((prev) => prev.filter((p) => p._id !== selectedProduct._id));
+      setShowDeleteModal(false);
+    } catch (err) {
+      console.error('Failed to delete product:', err);
+      setError('Unable to delete product. Please try again.');
+    }
   };
 
   return (
@@ -366,6 +406,9 @@ export default function AdminProducts() {
                   rows="3"
                 />
 
+                {error && (
+                  <p className="text-sm text-red-400">{error}</p>
+                )}
                 <div className="flex gap-3 pt-4">
                   <NeonButton
                     variant="primary"

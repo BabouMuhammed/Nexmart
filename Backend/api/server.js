@@ -1,15 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./config/db');
+const connectDB = require('../config/db');
 
 // Route imports
-const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/productRoutes');
-const cartRoutes = require('./routes/cartRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
-const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('../routes/authRoutes');
+const productRoutes = require('../routes/productRoutes');
+const cartRoutes = require('../routes/cartRoutes');
+const orderRoutes = require('../routes/orderRoutes');
+const reviewRoutes = require('../routes/reviewRoutes');
+const adminRoutes = require('../routes/adminRoutes');
 
 // Connect to MongoDB Atlas
 connectDB();
@@ -17,15 +17,22 @@ connectDB();
 const app = express();
 // node server.js
 // ─── Middleware ───────────────────────────────────────────────
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://localhost:3003',
+  'https://nexmart-zeta-rose.vercel.app',
+  process.env.CLIENT_URL,
+].filter(Boolean);
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:3003',
-    'https://nexmart-website.netlify.app'
-  ],
-  credentials: true
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error(`CORS policy does not allow access from origin ${origin}`));
+  },
+  credentials: true,
 }));
 
 app.use(express.json());

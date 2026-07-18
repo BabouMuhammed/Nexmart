@@ -17,12 +17,14 @@ import { NeonButton } from '../components/NeonButton';
 import { StarRating } from '../components/StarRating';
 import { ProductCard } from '../components/ProductCard';
 import { getProductById, getProducts } from '../services/api';
+import { useCart } from '../contexts/CartContext';
 
 export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [error, setError] = useState('');
   const [location, navigate] = useLocation();
   const productId = location.split('/').pop();
 
@@ -40,9 +42,19 @@ export default function ProductDetail() {
     loadProduct();
   }, [productId]);
 
-  const handleAddToCart = () => {
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+  const { addItemToCart } = useCart();
+
+  const handleAddToCart = async () => {
+    setError('');
+
+    try {
+      await addItemToCart(product._id, quantity);
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    } catch (err) {
+      console.error('Failed to add to cart:', err);
+      setError('Unable to add item to cart. Please sign in and try again.');
+    }
   };
 
   if (!product) {
@@ -205,6 +217,9 @@ export default function ProductDetail() {
                     )}
                   </NeonButton>
                 </motion.div>
+                {error && (
+                  <p className="text-sm text-red-400 mt-2">{error}</p>
+                )}
 
                 <div className="flex gap-3">
                   <motion.button

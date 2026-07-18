@@ -3,11 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Search, ShoppingCart, Menu, X, LogIn, Home, Store, User } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { NeonButton } from './NeonButton';
+import { useCart } from '../contexts/CartContext';
 
-export function Navbar({ cartCount = 0 }) {
+export function Navbar({ cartCount: propCartCount = 0 }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { cartCount } = useCart();
   const [, navigate] = useLocation();
+  const effectiveCartCount = cartCount ?? propCartCount;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -108,13 +111,13 @@ export function Navbar({ cartCount = 0 }) {
               }`}
             >
               <ShoppingCart className="w-5 h-5" />
-              {cartCount > 0 && (
+              {effectiveCartCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#00E5D4] text-[#050B2D] text-xs font-bold flex items-center justify-center"
                 >
-                  {cartCount}
+                  {effectiveCartCount}
                 </motion.span>
               )}
             </motion.button>

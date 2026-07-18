@@ -17,6 +17,7 @@ import { Footer } from '../components/Footer';
 import { GlassCard } from '../components/GlassCard';
 import { NeonButton } from '../components/NeonButton';
 import { ProductCard } from '../components/ProductCard';
+import { useCart } from '../contexts/CartContext';
 import { LuxuryHero } from '../components/LuxuryHero';
 import { FeatureCard } from '../components/FeatureCard';
 import { SectionDivider } from '../components/SectionDivider';
@@ -27,6 +28,8 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [, navigate] = useLocation();
 
+  const { addItemToCart } = useCart();
+
   useEffect(() => {
     const loadData = async () => {
       const prods = await getProducts();
@@ -35,7 +38,7 @@ export default function Home() {
       setCategories(cats);
     };
     loadData();
-  }, []);
+  }, [addItemToCart]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -168,7 +171,7 @@ export default function Home() {
           >
             {products.map((product) => (
               <motion.div key={product._id} variants={itemVariants}>
-                <ProductCard product={product} />
+                <ProductCard product={product} onAddToCart={() => addItemToCart(product._id)} />
               </motion.div>
             ))}
           </motion.div>

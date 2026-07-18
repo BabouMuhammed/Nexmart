@@ -82,7 +82,16 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
 // ── @route   POST /api/products
 // ── @access  Private (seller, admin)
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, discountPrice, category, brand, stock } = req.body;
+  const {
+    name,
+    description,
+    price,
+    discountPrice,
+    category,
+    brand,
+    stock,
+    badge,
+  } = req.body;
 
   // Handle uploaded images from Cloudinary
   const images = req.files
@@ -99,6 +108,7 @@ const createProduct = asyncHandler(async (req, res) => {
     discountPrice,
     category,
     brand,
+    badge,
     stock,
     images,
     seller: req.user._id,

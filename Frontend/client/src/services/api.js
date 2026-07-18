@@ -4,14 +4,28 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: { 'Content-Type': 'application/json' },
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`,
+    };
   }
+
+  if (config.data instanceof FormData) {
+    // Let axios set multipart/form-data headers automatically
+    const { 'Content-Type': _, ...rest } = config.headers || {};
+    config.headers = rest;
+  } else {
+    config.headers = {
+      'Content-Type': 'application/json',
+      ...config.headers,
+    };
+  }
+
   return config;
 });
 
@@ -147,11 +161,51 @@ export async function getAdminProducts() {
   return getProducts();
 }
 
+export async function createProduct(productData) {
+  try {
+    const { data } = await api.post('/api/products', productData);
+    return normalizeProduct(data);
+  } catch (error) {
+    console.error('createProduct failed:', getErrorMessage(error));
+    throw error;
+  }
+}
+
+export async function updateProduct(productId, productData) {
+  try {
+    const { data } = await api.put(`/api/products/${productId}`, productData);
+    return normalizeProduct(data);
+  } catch (error) {
+    console.error('updateProduct failed:', getErrorMessage(error));
+    throw error;
+  }
+}
+
+export async function deleteProduct(productId) {
+  try {
+    const { data } = await api.delete(`/api/products/${productId}`);
+    return data;
+  } catch (error) {
+    console.error('deleteProduct failed:', getErrorMessage(error));
+    throw error;
+  }
+}
+
+export async function updateOrderStatus(orderId, orderStatus) {
+  try {
+    const { data } = await api.put(`/api/admin/orders/${orderId}/status`, {
+      orderStatus,
+    });
+    return normalizeOrder(data);
+  } catch (error) {
+    console.error('updateOrderStatus failed:', getErrorMessage(error));
+    throw error;
+  }
+}
+
 export async function getAdminStats() {
   try {
-    console.log('Fetching admin stats, token:', localStorage.getItem('token'));
     const { data } = await api.get('/api/admin/stats');
-    console.log('Admin stats response:', data);
     return {
       totalRevenue: data.totalRevenue || 0,
       revenueGrowth: 0,
@@ -232,8 +286,17 @@ export async function login(email, password) {
 }
 
 export async function register(name, email, password) {
-  await api.post('/api/auth/register', { name, email, password });
-  return { message: 'success' };
+  const { data } = await api.post('/api/auth/register', { name, email, password });
+  return {
+    token: data.token,
+    user: {
+      _id: data._id,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      avatar: data.avatar,
+    },
+  };
 }
 
 export async function getCart() {

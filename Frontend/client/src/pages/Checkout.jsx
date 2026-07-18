@@ -66,7 +66,7 @@ export default function Checkout() {
         paymentMethod: 'cash_on_delivery',
       };
       const result = await createOrder(orderData);
-      setOrderId(result.order._id);
+      setOrderId(result.order?._id || result._id);
       setOrderPlaced(true);
     } catch (err) {
       setError(
