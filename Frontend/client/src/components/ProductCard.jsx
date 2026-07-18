@@ -4,17 +4,27 @@ import { useLocation } from 'wouter';
 import { NeonButton } from './NeonButton';
 import { GlassCard } from './GlassCard';
 import { useWishlist } from '../contexts/WishListContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export function ProductCard({ product, onAddToCart }) {
   const [, navigate] = useLocation();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
   const inWishlist = isInWishlist(product._id);
 
   const handleWishlistClick = async (event) => {
     event.stopPropagation();
+
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
     const succeeded = await toggleWishlist(product);
     if (!succeeded) {
-      navigate('/login');
+      // User is logged in but the request itself failed (network/server error) —
+      // don't send them to login, just leave the heart state unchanged.
+      console.error('Failed to update wishlist. Please try again.');
     }
   };
 

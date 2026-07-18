@@ -87,9 +87,14 @@ export default function ProductDetail() {
   };
 
   const handleWishlistClick = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
     const succeeded = await toggleWishlist(product);
     if (!succeeded) {
-      navigate('/login');
+      setError('Unable to update your wishlist. Please try again.');
     }
   };
 
