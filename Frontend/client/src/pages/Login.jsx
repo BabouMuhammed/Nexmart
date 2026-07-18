@@ -4,7 +4,8 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { GlassCard } from '../components/GlassCard';
 import { NeonButton } from '../components/NeonButton';
-import { login } from '../services/api';
+import { login as loginRequest } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [, navigate] = useLocation();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,10 +22,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const result = await login(email, password);
+      const result = await loginRequest(email, password);
       if (result.token) {
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
+        login(result.token, result.user); // updates AuthContext + localStorage together
         navigate(result.user.role === 'admin' ? '/admin' : '/dashboard');
       }
     } catch (err) {
@@ -124,8 +125,6 @@ export default function Login() {
               </div>
             </div>
 
-          
-
             {/* Sign In Button */}
             <NeonButton
               variant="primary"
@@ -151,7 +150,6 @@ export default function Login() {
             </button>
           </p>
         </GlassCard>
-
       </motion.div>
     </div>
   );
