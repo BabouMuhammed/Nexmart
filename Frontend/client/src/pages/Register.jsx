@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Check, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Check, ArrowRight, Eye, EyeOff, ShoppingBag, Store } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { GlassCard } from '../components/GlassCard';
 import { NeonButton } from '../components/NeonButton';
@@ -13,7 +13,10 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'customer',
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [, navigate] = useLocation();
@@ -56,13 +59,16 @@ export default function Register() {
       const result = await register(
         formData.fullName,
         formData.email,
-        formData.password
+        formData.password,
+        formData.role
       );
-      if (result.message === 'success') {
+      if (result.token) {
         setStep(2);
+      } else {
+        setError('Registration failed. Please try again.');
       }
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -70,11 +76,8 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-[#050B2D] flex items-center justify-center relative overflow-hidden">
-      {/* Ambient Blobs */}
       <div className="glow-blob glow-blob-cyan absolute top-20 left-10 w-96 h-96" />
       <div className="glow-blob glow-blob-purple absolute bottom-10 right-20 w-96 h-96" />
-
-      {/* Purple Circle Decorators */}
       <div className="circle-decorator absolute top-10 right-20 w-40 h-40" />
       <div className="circle-decorator absolute bottom-20 left-10 w-32 h-32" />
 
@@ -85,14 +88,12 @@ export default function Register() {
       >
         {step === 1 ? (
           <GlassCard className="p-8">
-            {/* Logo */}
             <div className="flex items-center justify-center mb-8">
               <div className="p-3 rounded-lg bg-[#00E5D4] text-[#050B2D]">
                 <User className="w-6 h-6" />
               </div>
             </div>
 
-            {/* Heading */}
             <h1 className="text-3xl font-bold text-white text-center mb-2">
               Create Account
             </h1>
@@ -100,7 +101,6 @@ export default function Register() {
               Join NexMart and start shopping
             </p>
 
-            {/* Error Message */}
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -111,7 +111,6 @@ export default function Register() {
               </motion.div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleRegister} className="space-y-4 mb-6">
               {/* Full Name */}
               <div>
@@ -151,6 +150,39 @@ export default function Register() {
                 </div>
               </div>
 
+              {/* Role Selector */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  I want to
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, role: 'customer' }))}
+                    className={`flex flex-col items-center gap-2 py-4 rounded-lg border transition-all ${
+                      formData.role === 'customer'
+                        ? 'border-[#00E5D4] bg-[#00E5D4]/10 text-[#00E5D4]'
+                        : 'border-[rgba(0,229,212,0.2)] text-[#A0AEC0] hover:border-[#00E5D4]/50'
+                    }`}
+                  >
+                    <ShoppingBag className="w-6 h-6" />
+                    <span className="text-sm font-medium">Buy Products</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, role: 'seller' }))}
+                    className={`flex flex-col items-center gap-2 py-4 rounded-lg border transition-all ${
+                      formData.role === 'seller'
+                        ? 'border-[#00E5D4] bg-[#00E5D4]/10 text-[#00E5D4]'
+                        : 'border-[rgba(0,229,212,0.2)] text-[#A0AEC0] hover:border-[#00E5D4]/50'
+                    }`}
+                  >
+                    <Store className="w-6 h-6" />
+                    <span className="text-sm font-medium">Sell Products</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-white mb-2">
@@ -159,50 +191,34 @@ export default function Register() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 w-5 h-5 text-[#A0AEC0]" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="••••••••"
-                    className="w-full bg-[#0B143D] border border-[rgba(0,229,212,0.2)] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#64748B] focus:outline-none focus:border-[#00E5D4]"
+                    className="w-full bg-[#0B143D] border border-[rgba(0,229,212,0.2)] rounded-lg pl-10 pr-12 py-3 text-white placeholder-[#64748B] focus:outline-none focus:border-[#00E5D4]"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-[#A0AEC0] hover:text-[#00E5D4] transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
 
-                {/* Password Strength */}
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center gap-2">
-                    <div
-                      className={`w-4 h-4 rounded-full ${
-                        passwordStrength.hasLength
-                          ? 'bg-green-500'
-                          : 'bg-[#64748B]'
-                      }`}
-                    />
-                    <span className="text-xs text-[#A0AEC0]">
-                      8+ characters
-                    </span>
+                    <div className={`w-4 h-4 rounded-full ${passwordStrength.hasLength ? 'bg-green-500' : 'bg-[#64748B]'}`} />
+                    <span className="text-xs text-[#A0AEC0]">8+ characters</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div
-                      className={`w-4 h-4 rounded-full ${
-                        passwordStrength.hasUppercase
-                          ? 'bg-green-500'
-                          : 'bg-[#64748B]'
-                      }`}
-                    />
-                    <span className="text-xs text-[#A0AEC0]">
-                      Uppercase letter
-                    </span>
+                    <div className={`w-4 h-4 rounded-full ${passwordStrength.hasUppercase ? 'bg-green-500' : 'bg-[#64748B]'}`} />
+                    <span className="text-xs text-[#A0AEC0]">Uppercase letter</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div
-                      className={`w-4 h-4 rounded-full ${
-                        passwordStrength.hasNumber
-                          ? 'bg-green-500'
-                          : 'bg-[#64748B]'
-                      }`}
-                    />
+                    <div className={`w-4 h-4 rounded-full ${passwordStrength.hasNumber ? 'bg-green-500' : 'bg-[#64748B]'}`} />
                     <span className="text-xs text-[#A0AEC0]">Number</span>
                   </div>
                 </div>
@@ -216,31 +232,32 @@ export default function Register() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 w-5 h-5 text-[#A0AEC0]" />
                   <input
-                    type="password"
+                    type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="••••••••"
-                    className="w-full bg-[#0B143D] border border-[rgba(0,229,212,0.2)] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#64748B] focus:outline-none focus:border-[#00E5D4]"
+                    className="w-full bg-[#0B143D] border border-[rgba(0,229,212,0.2)] rounded-lg pl-10 pr-12 py-3 text-white placeholder-[#64748B] focus:outline-none focus:border-[#00E5D4]"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-3 text-[#A0AEC0] hover:text-[#00E5D4] transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
                 {formData.confirmPassword && !passwordsMatch && (
-                  <p className="text-xs text-red-400 mt-1">
-                    Passwords do not match
-                  </p>
+                  <p className="text-xs text-red-400 mt-1">Passwords do not match</p>
                 )}
               </div>
 
-              {/* Terms */}
               <p className="text-xs text-[#A0AEC0]">
                 By creating an account, you agree to our{' '}
-                <a href="#" className="text-[#00E5D4] hover:underline">
-                  Terms of Service
-                </a>
+                <a href="#" className="text-[#00E5D4] hover:underline">Terms of Service</a>
               </p>
 
-              {/* Sign Up Button */}
               <NeonButton
                 variant="primary"
                 size="lg"
@@ -255,7 +272,6 @@ export default function Register() {
               </NeonButton>
             </form>
 
-            {/* Sign In Link */}
             <p className="text-center text-[#A0AEC0]">
               Already have an account?{' '}
               <button
@@ -267,11 +283,7 @@ export default function Register() {
             </p>
           </GlassCard>
         ) : (
-          /* Success Screen */
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-          >
+          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
             <GlassCard className="p-8 text-center">
               <motion.div
                 initial={{ scale: 0 }}
@@ -282,12 +294,9 @@ export default function Register() {
                 <Check className="w-10 h-10 text-green-400" />
               </motion.div>
 
-              <h2 className="text-3xl font-bold text-white mb-4">
-                Account Created!
-              </h2>
+              <h2 className="text-3xl font-bold text-white mb-4">Account Created!</h2>
               <p className="text-[#A0AEC0] mb-8">
-                Your account has been successfully created. You can now sign in
-                to your account.
+                Your account has been successfully created. You can now sign in to your account.
               </p>
 
               <NeonButton

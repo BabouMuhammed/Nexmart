@@ -285,8 +285,8 @@ export async function login(email, password) {
   };
 }
 
-export async function register(name, email, password) {
-  const { data } = await api.post('/api/auth/register', { name, email, password });
+export async function register(name, email, password, role) {
+  const { data } = await api.post('/api/auth/register', { name, email, password, role });
   return {
     token: data.token,
     user: {
