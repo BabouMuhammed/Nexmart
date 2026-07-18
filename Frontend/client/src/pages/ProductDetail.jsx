@@ -8,6 +8,7 @@ import {
   Lock,
   Zap,
   ChevronLeft,
+  Star,
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Navbar } from '../components/Navbar';
@@ -16,8 +17,15 @@ import { GlassCard } from '../components/GlassCard';
 import { NeonButton } from '../components/NeonButton';
 import { StarRating } from '../components/StarRating';
 import { ProductCard } from '../components/ProductCard';
-import { getProductById, getProducts } from '../services/api';
+import {
+  getProductById,
+  getProducts,
+  getProductReviews,
+  createReview,
+} from '../services/api';
 import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 export default function ProductDetail() {
   const [product, setProduct] = useState(null);
@@ -27,6 +35,19 @@ export default function ProductDetail() {
   const [error, setError] = useState('');
   const [location, navigate] = useLocation();
   const productId = location.split('/').pop();
+
+  // Reviews
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', comment: '' });
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+
+  const { user } = useAuth();
+  const { addItemToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -42,7 +63,15 @@ export default function ProductDetail() {
     loadProduct();
   }, [productId]);
 
-  const { addItemToCart } = useCart();
+  useEffect(() => {
+    const loadReviews = async () => {
+      setReviewsLoading(true);
+      const data = await getProductReviews(productId);
+      setReviews(data);
+      setReviewsLoading(false);
+    };
+    loadReviews();
+  }, [productId]);
 
   const handleAddToCart = async () => {
     setError('');
@@ -57,6 +86,43 @@ export default function ProductDetail() {
     }
   };
 
+  const handleWishlistClick = async () => {
+    const succeeded = await toggleWishlist(product);
+    if (!succeeded) {
+      navigate('/login');
+    }
+  };
+
+  const handleOpenReviewForm = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setReviewError('');
+    setReviewSuccess(false);
+    setShowReviewForm((prev) => !prev);
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    setReviewError('');
+    setReviewSubmitting(true);
+
+    try {
+      const newReview = await createReview(productId, reviewForm);
+      setReviews((prev) => [newReview, ...prev]);
+      setReviewSuccess(true);
+      setShowReviewForm(false);
+      setReviewForm({ rating: 5, title: '', comment: '' });
+    } catch (err) {
+      const message =
+        err.response?.data?.message || 'Unable to submit your review. Please try again.';
+      setReviewError(message);
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
   if (!product) {
     return (
       <div className="min-h-screen bg-[#050B2D] flex items-center justify-center">
@@ -64,6 +130,8 @@ export default function ProductDetail() {
       </div>
     );
   }
+
+  const inWishlist = isInWishlist(product._id);
 
   return (
     <div className="min-h-screen bg-[#050B2D]">
@@ -224,10 +292,16 @@ export default function ProductDetail() {
                 <div className="flex gap-3">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/10 transition-all"
+                    onClick={handleWishlistClick}
+                    aria-pressed={inWishlist}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border-2 transition-all ${
+                      inWishlist
+                        ? 'border-[#8B5CF6] bg-[#8B5CF6]/10 text-[#8B5CF6]'
+                        : 'border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/10'
+                    }`}
                   >
-                    <Heart className="w-5 h-5" />
-                    Wishlist
+                    <Heart className={`w-5 h-5 ${inWishlist ? 'fill-[#8B5CF6]' : ''}`} />
+                    {inWishlist ? 'Wishlisted' : 'Wishlist'}
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -258,35 +332,122 @@ export default function ProductDetail() {
       {/* Customer Reviews */}
       <section className="py-20 border-t border-[rgba(0,229,212,0.1)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-white mb-12"
-          >
-            Customer Reviews
-          </motion.h2>
+          <div className="flex items-center justify-between mb-12 flex-wrap gap-4">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-3xl font-bold text-white"
+            >
+              Customer Reviews
+            </motion.h2>
+            <NeonButton variant="secondary" size="sm" onClick={handleOpenReviewForm}>
+              {showReviewForm ? 'Cancel' : 'Write a Review'}
+            </NeonButton>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            {[...Array(3)].map((_, i) => (
-              <GlassCard key={i}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00E5D4] to-[#8B5CF6]" />
-                  <div>
-                    <p className="font-semibold text-white">Customer {i + 1}</p>
-                    <p className="text-xs text-[#A0AEC0]">2 weeks ago</p>
+          {reviewSuccess && (
+            <GlassCard className="mb-8 border border-green-500/30">
+              <p className="text-green-300 text-sm">Your review was submitted. Thanks!</p>
+            </GlassCard>
+          )}
+
+          {showReviewForm && (
+            <GlassCard className="mb-8">
+              <form onSubmit={handleSubmitReview} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-[#A0AEC0] mb-2">Your Rating</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setReviewForm((f) => ({ ...f, rating: star }))}
+                      >
+                        <Star
+                          className={`w-6 h-6 ${
+                            star <= reviewForm.rating
+                              ? 'fill-[#FFD93D] text-[#FFD93D]'
+                              : 'text-[#64748B]'
+                          }`}
+                        />
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <StarRating rating={4 + i * 0.2} showValue={false} />
-                <p className="text-[#A0AEC0] mt-3 text-sm">
-                  Great product! Exceeded my expectations. Highly recommended.
-                </p>
-              </GlassCard>
-            ))}
-          </motion.div>
+
+                <div>
+                  <label className="block text-sm text-[#A0AEC0] mb-2">Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={reviewForm.title}
+                    onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))}
+                    className="w-full bg-[#050B2D] border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#00E5D4] outline-none"
+                    placeholder="Sum up your experience"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-[#A0AEC0] mb-2">Review</label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
+                    className="w-full bg-[#050B2D] border border-white/10 rounded-lg px-4 py-2 text-white focus:border-[#00E5D4] outline-none resize-none"
+                    placeholder="What did you like or dislike?"
+                  />
+                </div>
+
+                {reviewError && <p className="text-sm text-red-400">{reviewError}</p>}
+
+                <NeonButton type="submit" variant="primary" disabled={reviewSubmitting}>
+                  {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                </NeonButton>
+              </form>
+            </GlassCard>
+          )}
+
+          {reviewsLoading ? (
+            <p className="text-[#A0AEC0]">Loading reviews...</p>
+          ) : reviews.length === 0 ? (
+            <p className="text-[#A0AEC0]">No reviews yet. Be the first to review this product.</p>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            >
+              {reviews.map((review) => (
+                <GlassCard key={review._id}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00E5D4] to-[#8B5CF6] overflow-hidden flex items-center justify-center text-white font-semibold">
+                      {review.user?.avatar ? (
+                        <img
+                          src={review.user.avatar}
+                          alt={review.user.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        review.user?.name?.charAt(0).toUpperCase() || '?'
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">
+                        {review.user?.name || 'Anonymous'}
+                      </p>
+                      <p className="text-xs text-[#A0AEC0]">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <StarRating rating={review.rating} showValue={false} />
+                  <p className="font-semibold text-white mt-3 text-sm">{review.title}</p>
+                  <p className="text-[#A0AEC0] mt-1 text-sm">{review.comment}</p>
+                </GlassCard>
+              ))}
+            </motion.div>
+          )}
         </div>
       </section>
 

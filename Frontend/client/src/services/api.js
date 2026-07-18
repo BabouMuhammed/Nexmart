@@ -346,3 +346,53 @@ export async function getMe() {
   const { data } = await api.get('/api/auth/me');
   return data;
 }
+
+// ─── Reviews ──────────────────────────────────────────────────
+
+export async function getProductReviews(productId) {
+  try {
+    const { data } = await api.get(`/api/reviews/${productId}`);
+    return data || [];
+  } catch (error) {
+    console.error('getProductReviews failed:', getErrorMessage(error));
+    return [];
+  }
+}
+
+export async function createReview(productId, { rating, title, comment }) {
+  // Let this one throw — the caller needs the specific error message
+  // (e.g. "you can only review products you've purchased and received")
+  const { data } = await api.post(`/api/reviews/${productId}`, {
+    rating,
+    title,
+    comment,
+  });
+  return data;
+}
+
+export async function deleteReview(reviewId) {
+  const { data } = await api.delete(`/api/reviews/${reviewId}`);
+  return data;
+}
+
+// ─── Wishlist ─────────────────────────────────────────────────
+
+export async function getWishlist() {
+  try {
+    const { data } = await api.get('/api/wishlist');
+    return (data || []).map(normalizeProduct);
+  } catch (error) {
+    console.error('getWishlist failed:', getErrorMessage(error));
+    return [];
+  }
+}
+
+export async function addToWishlist(productId) {
+  const { data } = await api.post(`/api/wishlist/${productId}`);
+  return (data || []).map(normalizeProduct);
+}
+
+export async function removeFromWishlist(productId) {
+  const { data } = await api.delete(`/api/wishlist/${productId}`);
+  return (data || []).map(normalizeProduct);
+}

@@ -1,9 +1,23 @@
 import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Star, Sparkles } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { NeonButton } from './NeonButton';
 import { GlassCard } from './GlassCard';
+import { useWishlist } from '../contexts/WishlistContext';
 
 export function ProductCard({ product, onAddToCart }) {
+  const [, navigate] = useLocation();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const inWishlist = isInWishlist(product._id);
+
+  const handleWishlistClick = async (event) => {
+    event.stopPropagation();
+    const succeeded = await toggleWishlist(product);
+    if (!succeeded) {
+      navigate('/login');
+    }
+  };
+
   const getBadgeClass = (badge) => {
     const baseClass = 'absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md';
     switch (badge) {
@@ -52,9 +66,14 @@ export function ProductCard({ product, onAddToCart }) {
           <motion.button
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.9 }}
-            className="absolute top-4 right-4 bg-[#050B2D]/60 backdrop-blur-md p-2 rounded-full hover:bg-[#00E5D4]/20 hover:text-[#00E5D4] text-white/70 transition-all border border-white/10"
+            onClick={handleWishlistClick}
+            aria-pressed={inWishlist}
+            aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+            className={`absolute top-4 right-4 bg-[#050B2D]/60 backdrop-blur-md p-2 rounded-full hover:bg-[#00E5D4]/20 hover:text-[#00E5D4] transition-all border border-white/10 ${
+              inWishlist ? 'text-[#00E5D4]' : 'text-white/70'
+            }`}
           >
-            <Heart className="w-5 h-5" />
+            <Heart className={`w-5 h-5 ${inWishlist ? 'fill-[#00E5D4]' : ''}`} />
           </motion.button>
 
           {/* Price Badge - Floating */}

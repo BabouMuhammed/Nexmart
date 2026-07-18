@@ -74,7 +74,7 @@ const deleteReview = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to delete this review');
   }
 
-  await review.remove();
+  await review.deleteOne();
   res.json({ message: 'Review deleted' });
 });
 

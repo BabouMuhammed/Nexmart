@@ -5,7 +5,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
+import { WishlistProvider } from "./contexts/WishlistContext.jsx";
 
 // Public Pages
 import Home from "./pages/Home.jsx";
@@ -59,10 +60,12 @@ function App() {
       <ThemeProvider defaultTheme="dark">
         <AuthProvider>
           <CartProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
+            <WishlistProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>

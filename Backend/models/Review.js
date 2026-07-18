@@ -65,7 +65,9 @@ reviewSchema.post('save', function () {
   this.constructor.calcAverageRating(this.product);
 });
 
-reviewSchema.post('remove', function () {
+// Mongoose 6+: review.deleteOne() on a document instance fires this
+// document-level hook (the old 'remove' hook never fires for deleteOne()).
+reviewSchema.post('deleteOne', { document: true, query: false }, function () {
   this.constructor.calcAverageRating(this.product);
 });
 

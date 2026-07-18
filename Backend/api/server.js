@@ -9,6 +9,7 @@ const productRoutes = require('../routes/productRoutes');
 const cartRoutes = require('../routes/cartRoutes');
 const orderRoutes = require('../routes/orderRoutes');
 const reviewRoutes = require('../routes/reviewRoutes');
+const wishlistRoutes = require('../routes/wishlistRoutes');
 const adminRoutes = require('../routes/adminRoutes');
 
 // Connect to MongoDB Atlas
@@ -44,6 +45,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/admin', adminRoutes);
 
 // ─── Health Check ─────────────────────────────────────────────
