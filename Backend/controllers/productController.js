@@ -137,9 +137,20 @@ const updateProduct = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to update this product');
   }
 
+  // Build updates from request body
+  const updates = { ...req.body };
+
+  // If new images were uploaded, map them and replace images
+  if (req.files && req.files.length > 0) {
+    updates.images = req.files.map((file) => ({
+      url: file.path,
+      public_id: file.filename,
+    }));
+  }
+
   const updatedProduct = await Product.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    updates,
     { new: true, runValidators: true }
   );
 

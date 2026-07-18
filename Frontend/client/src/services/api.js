@@ -190,7 +190,22 @@ export async function createProduct(productData) {
 
 export async function updateProduct(productId, productData) {
   try {
-    const { data } = await api.put(`/api/products/${productId}`, productData);
+    let payload = productData;
+
+    // If images were attached, send multipart FormData like createProduct
+    if (productData.images && productData.images.length > 0) {
+      const form = new FormData();
+      Object.entries(productData).forEach(([key, value]) => {
+        if (key === 'images') {
+          value.forEach((file) => form.append('images', file));
+        } else {
+          form.append(key, value);
+        }
+      });
+      payload = form;
+    }
+
+    const { data } = await api.put(`/api/products/${productId}`, payload);
     return normalizeProduct(data);
   } catch (error) {
     console.error('updateProduct failed:', getErrorMessage(error));

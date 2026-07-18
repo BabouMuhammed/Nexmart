@@ -24,7 +24,13 @@ router.post(
   createProduct
 );
 
-router.put('/:id', protect, roleGuard('seller', 'admin'), updateProduct);
+router.put(
+  '/:id',
+  protect,
+  roleGuard('seller', 'admin'),
+  upload.array('images', 5), // accept images on update as well
+  updateProduct
+);
 router.delete('/:id', protect, roleGuard('seller', 'admin'), deleteProduct);
 
 module.exports = router;
